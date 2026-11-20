@@ -1,3 +1,62 @@
+# TEG — moje miniprojekty AI
+
+Repozytorium do rozwijania własnych rozwiązań z przedmiotu **Technologie Generatywne** i dokumentowania postępów w portfolio.
+
+**Źródło materiałów:** [wodecki/TEG_PL_Project_2026](https://github.com/wodecki/TEG_PL_Project_2026), autor repozytorium źródłowego: Andrzej Wodecki. Materiały kursowe, dane, testy i szkielety zadań pochodzą z tego repozytorium. Własne rozwiązania będą widoczne w kolejnych commitach. Oryginalna instrukcja kursowa znajduje się poniżej.
+
+## Aktualny stan
+
+To punkt startowy do pracy: pięć miniprojektów zawiera jeszcze funkcje z `NotImplementedError`. Przygotowanie środowiska nie oznacza ukończenia ćwiczeń. Pełny zestaw testów będzie zgłaszał błędy do czasu zaimplementowania odpowiednich kroków.
+
+| Projekt | Zakres | Stan |
+|---|---|---|
+| [1](mini_project_1/README.md) | Dokumenty, tokeny, embeddingi i wyszukiwanie semantyczne | Do realizacji |
+| [2](mini_project_2/README.md) | RAG i ewaluacja odpowiedzi | Do realizacji |
+| [3](mini_project_3/README.md) | Grafy, rozmowa i akceptacja decyzji | Do realizacji |
+| [4](mini_project_4/README.md) | Agent z narzędziami | Do realizacji |
+| [5](mini_project_5/README.md) | MCP i asystent | Do realizacji |
+
+## Uruchomienie na macOS / Linux
+
+Wymagane: Git, Python 3 do instalacji narzędzi i dostęp do internetu podczas pierwszej instalacji. Projekt korzysta z **Pythona 3.12**, którego `uv` dobierze lub pobierze automatycznie.
+
+```bash
+sh scripts/setup.sh
+.venv/bin/python mini_project_1/src/check.py
+```
+
+Skrypt instaluje zależności z `uv.lock`, tworzy `.venv` i pusty plik konfiguracyjny `.env` na podstawie przykładu, jeżeli plik jeszcze nie istnieje. Przy braku `uv` instaluje je lokalnie w `.tools/`. Ponowne uruchomienie zachowuje istniejący `.env`.
+
+Program `check.py` pokaże, które zadania czekają na wykonanie. Instrukcje do pierwszego zadania: [Miniprojekt 1](mini_project_1/README.md). Możesz aktywować środowisko poleceniem `source .venv/bin/activate`, a następnie używać `python` zamiast `.venv/bin/python`.
+
+Klucz API wpisz wyłącznie do lokalnego `.env`, gdy dojdziesz do wywołań modelu. Testy jednostkowe działają bez klucza. `.env`, środowisko i lokalne narzędzia są wykluczone z Gita.
+
+## Sprawdzanie i publikowanie postępów
+
+```bash
+# Testy gotowej konfiguracji i pomocników; działają przed realizacją zadań:
+.venv/bin/python -m pytest -q mini_project_1/tests/test_provided_config.py mini_project_1/tests/test_provided_llm_notice.py mini_project_1/tests/test_provided_prompt.py
+
+# Testy pierwszego miniprojektu — po napisaniu jego kroków:
+.venv/bin/python -m pytest -q mini_project_1/tests
+
+# Wszystkie testy — wynik zależy od postępu w pięciu miniprojektach:
+.venv/bin/python -m pytest -q
+
+# Po sprawdzeniu własnych zmian:
+git status
+git add mini_project_1/src/step1_load_documents.py
+git diff --cached
+git commit -m "Implement document loading for mini project 1"
+git push origin main
+```
+
+GitHub Actions automatycznie sprawdza instalację środowiska, składnię Pythona oraz testy gotowej konfiguracji i pomocników. **Zielony wynik tego workflow nie oznacza ukończenia miniprojektów.** Pełne testy ćwiczeń można dodatkowo uruchomić ręcznie w zakładce Actions → Sprawdzenie środowiska → Run workflow → zaznaczając `Uruchom pełne testy ćwiczeń`.
+
+Do portfolio warto po każdym ukończonym miniprojekcie dopisać: własny zakres prac, sposób uruchomienia, wynik testów i przykład działania. Repozytorium źródłowe nie zawiera pliku licencji; ten projekt nie nadaje nowej licencji materiałom autora.
+
+---
+
 # Laboratorium TEG
 
 W tym repozytorium znajdziesz materiały na ćwiczenia z kursu Technologie Generatywne.
