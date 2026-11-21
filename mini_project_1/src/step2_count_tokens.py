@@ -39,10 +39,16 @@ from helpers.config import Config
 
 
 def count_tokens(text: str, config: Config) -> int:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: count_tokens")
+    encoding = tiktoken.get_encoding(config.get("tokenizer.encoding"))
+    return len(encoding.encode(text))
 
 
 def monthly_cost(input_tokens_per_question: float, config: Config) -> float:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: monthly_cost")
+    prices = config.get("cost.prices_per_1m_tokens")[config.get("cost.reference_model")]
+    scenario = config.get("cost.scenario")
+    monthly_questions = scenario["questions_per_day"] * scenario["working_days_per_month"]
+    cost_per_question = (
+        input_tokens_per_question * prices["input"]
+        + scenario["output_tokens_per_answer"] * prices["output"]
+    ) / 1_000_000
+    return monthly_questions * cost_per_question

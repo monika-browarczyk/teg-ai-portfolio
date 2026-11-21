@@ -3,10 +3,40 @@
 **Cel:** przygotować wyszukiwanie semantyczne, czyli wyszukiwanie według znaczenia, w 18 dokumentach Kovalo, oszacować miesięczny koszt asystenta i sprawdzić połączenie z dużym modelem językowym (ang. large language model, LLM).
 **Czas:** około 3 godzin. **Framework:** LangChain, te same komponenty co w przykładach RAG z kursu.
 
+## Stan implementacji w portfolio
+
+**Zaimplementowano wszystkie kroki (1–6).** Lokalna weryfikacja z 2026-11-21: **50/50 testów** oraz **14/14 sprawdzeń `check.py`** zaliczonych. Poniższa instrukcja kursowa opisuje wymagania, według których powstała implementacja.
+
+| Krok | Implementacja | Testy |
+|---|---|---|
+| 1 | Dokumenty Markdown, metadane i walidacja katalogu | 9/9 |
+| 2 | Tokenizacja i szacowanie kosztu miesięcznego | 8/8 |
+| 3 | Podział na chunki z metadanymi i identyfikatorami | 6/6 |
+| 4 | Embeddingi z cache dokumentów i pytań | 4/4 |
+| 5 | Baza wektorowa, filtr typu dokumentu i podobieństwo kosinusowe | 10/10 |
+| 6 | Klienci OpenAI, OpenRouter i Ollama oraz pomiar tokenów | 8/8 |
+| Gotowe pomocniki | Konfiguracja, prompt i komunikaty o modelach | 5/5 |
+| **Łącznie** | | **50/50** |
+
+Pipeline przetworzył 18 dokumentów (8762 tokeny) na 47 chunków. Średnia długość chunku wynosi 603,7 znaku, a maksymalna 798 znaków. Wszystkie 47 wektorów chunków i 10 wektorów pytań odczytano z kursowego cache; każdy ma 1536 wymiarów. Hit@1 i hit@3 wynoszą po 0,9. Wyniki są zgodne z przebiegiem referencyjnym poniżej.
+
+Oszacowanie miesięczne dla wyszukanego kontekstu wyniosło 17,78 USD, a dla całego korpusu 69,86 USD. To symulacja według ustalonych cen i scenariusza z `config.yaml`, nie koszt wykonanych wywołań.
+
+Testy kroku 6 korzystają z atrap: potwierdzają konfigurację klientów i obsługę tokenów, ale nie rzeczywiste połączenie z dostawcą. **Prawdziwe wywołanie LLM-a i zaliczenie Edux pozostają niepotwierdzone.**
+
+Sprawdzenie z katalogu głównego repozytorium na macOS / Linux:
+
+```bash
+.venv/bin/python -m pytest -q mini_project_1/tests
+PYTHONPATH="$PWD" .venv/bin/python -m mini_project_1.src.check
+```
+
+Raport powstaje lokalnie w `mini_project_1/output/report.json`, a fragmenty w `mini_project_1/output/chunks.jsonl`. Folder `output/` jest wykluczony z Gita. Po skonfigurowaniu dostępu do wybranego modelu można osobno uruchomić `.venv/bin/python -m mini_project_1.src.first_llm_call`; wykonuje prawdziwe wywołanie.
+
 ## Kryteria ukończenia
 
-- [ ] `uv run python mini_project_1/src/check.py` pokazuje **PASS** w każdym wierszu (bez klucza API)
-- [ ] wyniki wypisane przez program na końcu przejrzane
+- [x] `uv run python mini_project_1/src/check.py` pokazuje **PASS** w każdym wierszu (bez klucza API)
+- [x] wyniki wypisane przez program na końcu przejrzane
 - [ ] `uv run python mini_project_1/src/first_llm_call.py` wypisuje odpowiedź twojego LLM-a (potrzebny dostęp do LLM-a, zobacz „Podłącz swój LLM”)
 - [ ] [CONCEPTS.md](CONCEPTS.md) przeczytany, test z Miniprojektu 1 na platformie Edux zaliczony
 

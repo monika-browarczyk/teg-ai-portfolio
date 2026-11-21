@@ -51,5 +51,26 @@ from helpers.config import Config
 
 
 def load_documents(config: Config) -> list[Document]:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: load_documents")
+    catalog = load_catalog(config.path("paths.corpus_catalog"))
+    required_fields = config.get("corpus.required_metadata")
+    documents = DirectoryLoader(
+        str(config.path("paths.corpus_dir")),
+        glob="*.md",
+        loader_cls=TextLoader,
+        loader_kwargs={"encoding": "utf-8"},
+    ).load()
+
+    for document in documents:
+        filename = Path(document.metadata["source"]).name
+        if filename not in catalog:
+            raise ValueError(f"{filename}: brak wpisu w katalogu")
+
+        row = catalog[filename]
+        missing_fields = [field for field in required_fields if not row.get(field)]
+        if missing_fields:
+            raise ValueError(f"{filename}: brak metadanych: {', '.join(missing_fields)}")
+
+        document.metadata = {field: row[field] for field in required_fields}
+        document.metadata["source"] = filename
+
+    return sorted(documents, key=lambda document: document.metadata["doc_id"])

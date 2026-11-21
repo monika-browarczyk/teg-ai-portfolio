@@ -41,16 +41,32 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 
 
-def build_vector_store(chunks: list[Document], embeddings: Embeddings) -> InMemoryVectorStore:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: build_vector_store")
+def build_vector_store(
+    chunks: list[Document], embeddings: Embeddings
+) -> InMemoryVectorStore:
+    store = InMemoryVectorStore(embedding=embeddings)
+    store.add_documents(chunks, ids=[chunk.metadata["chunk_id"] for chunk in chunks])
+    return store
 
 
-def search(store: InMemoryVectorStore, question: str, k: int, doc_type: str | None = None) -> list[tuple[Document, float]]:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: search")
+def search(
+    store: InMemoryVectorStore,
+    question: str,
+    k: int,
+    doc_type: str | None = None,
+) -> list[tuple[Document, float]]:
+    if doc_type is None:
+        return store.similarity_search_with_score(question, k=k)
+    return store.similarity_search_with_score(
+        question,
+        k=k,
+        filter=lambda document: document.metadata.get("doc_type") == doc_type,
+    )
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: cosine_similarity")
+    a_norm = np.linalg.norm(a)
+    b_norm = np.linalg.norm(b)
+    if a_norm == 0 or b_norm == 0:
+        raise ValueError("Podobieństwo kosinusowe wymaga wektorów o niezerowej normie")
+    return float(np.dot(a, b) / (a_norm * b_norm))

@@ -47,5 +47,14 @@ from helpers.config import Config
 
 
 def build_embeddings(config: Config, underlying: Embeddings | None = None) -> Embeddings:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: build_embeddings")
+    model_name = config.get("embeddings.model")
+    if underlying is None:
+        underlying = OpenAIEmbeddings(model=model_name)
+
+    return CacheBackedEmbeddings.from_bytes_store(
+        underlying,
+        LocalFileStore(config.path("paths.embedding_cache")),
+        namespace=model_name,
+        query_embedding_cache=True,
+        key_encoder="sha256",
+    )

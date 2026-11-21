@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   environment:
-    name: Instalacja, składnia i gotowe pomocniki
+    name: Instalacja, składnia i Miniprojekt 1
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -26,12 +26,12 @@ jobs:
           enable-cache: true
       - run: uv sync --locked
       - run: uv run --no-sync python -m compileall -q helpers mini_project_1 mini_project_2 mini_project_3 mini_project_4 mini_project_5
-      - name: Testy gotowej konfiguracji i pomocników
-        run: >-
-          uv run --no-sync pytest -q
-          mini_project_1/tests/test_provided_config.py
-          mini_project_1/tests/test_provided_llm_notice.py
-          mini_project_1/tests/test_provided_prompt.py
+      - name: Wszystkie testy Miniprojektu 1
+        run: uv run --no-sync pytest -q mini_project_1/tests
+      - name: Pipeline i sprawdzenia Miniprojektu 1
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: uv run --no-sync python -m mini_project_1.src.check
 
   exercises:
     name: Pełne testy ćwiczeń (na żądanie)

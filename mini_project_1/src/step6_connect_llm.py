@@ -59,10 +59,52 @@ from helpers.config import Config, ConfigError, MissingConfigError
 
 
 def build_llm(config: Config) -> BaseChatModel:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: build_llm")
+    provider = config.get("llm.provider")
+    supported_providers = ("openai", "openrouter", "ollama")
+    if provider not in supported_providers:
+        raise ConfigError(f"Dozwoleni dostawcy LLM: {', '.join(supported_providers)}")
+
+    model_name = config.get("llm.model")
+    temperature = config.get("llm.temperature")
+    if provider == "ollama":
+        return init_chat_model(
+            model_name,
+            model_provider="ollama",
+            temperature=temperature,
+            base_url=config.get("llm.base_urls")["ollama"],
+        )
+
+    key_variable = config.get("llm.api_key_env")[provider]
+    api_key = os.environ.get(key_variable)
+    if not api_key:
+        raise MissingConfigError(
+            f"Zmienna {key_variable} nie jest ustawiona. Dodaj ją do .env."
+        )
+
+    base_url = (
+        config.get("llm.base_urls")["openrouter"] if provider == "openrouter" else None
+    )
+    return init_chat_model(
+        model_name,
+        model_provider="openai",
+        temperature=temperature,
+        api_key=api_key,
+        base_url=base_url,
+    )
 
 
 def measure_call(llm: BaseChatModel, prompt: str) -> dict:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: measure_call")
+    response = llm.invoke(prompt)
+    usage = response.usage_metadata
+    if usage is None or any(
+        usage.get(key) is None for key in ("input_tokens", "output_tokens")
+    ):
+        raise ValueError(
+            "Odpowiedź modelu nie zawiera liczby tokenów wejściowych i wyjściowych"
+        )
+
+    return {
+        "answer": response.text,
+        "input_tokens": usage["input_tokens"],
+        "output_tokens": usage["output_tokens"],
+    }

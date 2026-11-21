@@ -46,5 +46,18 @@ from helpers.config import Config
 
 
 def chunk_documents(docs: list[Document], config: Config) -> list[Document]:
-    # TODO: twój kod – zobacz CEL, WYNIK i WYMAGANIA na początku pliku
-    raise NotImplementedError("TODO: chunk_documents")
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=config.get("chunking.chunk_size"),
+        chunk_overlap=config.get("chunking.chunk_overlap"),
+        separators=config.get("chunking.separators"),
+    )
+    chunks: list[Document] = []
+
+    for document in docs:
+        document_chunks = splitter.split_documents([document])
+        for index, chunk in enumerate(document_chunks):
+            chunk.metadata["chunk_index"] = index
+            chunk.metadata["chunk_id"] = f"{chunk.metadata['doc_id']}#{index:03d}"
+        chunks.extend(document_chunks)
+
+    return chunks

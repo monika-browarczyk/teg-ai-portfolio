@@ -2,19 +2,43 @@
 
 Repozytorium do rozwijania własnych rozwiązań z przedmiotu **Technologie Generatywne** i dokumentowania postępów w portfolio.
 
-**Źródło materiałów:** [wodecki/TEG_PL_Project_2026](https://github.com/wodecki/TEG_PL_Project_2026), autor repozytorium źródłowego: Andrzej Wodecki. Materiały kursowe, dane, testy i szkielety zadań pochodzą z tego repozytorium. Własne rozwiązania będą widoczne w kolejnych commitach. Oryginalna instrukcja kursowa znajduje się poniżej.
+**Źródło materiałów:** [wodecki/TEG_PL_Project_2026](https://github.com/wodecki/TEG_PL_Project_2026), autor repozytorium źródłowego: Andrzej Wodecki. Materiały kursowe, dane, testy i szkielety zadań pochodzą z tego repozytorium. Implementacje sześciu kroków Miniprojektu 1 znajdują się w folderze `mini_project_1/src/`. Oryginalna instrukcja kursowa znajduje się poniżej.
 
 ## Aktualny stan
 
-To punkt startowy do pracy: pięć miniprojektów zawiera jeszcze funkcje z `NotImplementedError`. Przygotowanie środowiska nie oznacza ukończenia ćwiczeń. Pełny zestaw testów będzie zgłaszał błędy do czasu zaimplementowania odpowiednich kroków.
+**Miniprojekt 1: kod wszystkich sześciu kroków ukończony i sprawdzony lokalnie.** Przechodzi 50/50 testów, a program `check.py` zalicza 14/14 sprawdzeń. Próba z prawdziwym LLM-em pozostaje do wykonania. Miniprojekty 2–5 nadal zawierają niezaimplementowane funkcje, więc pełny zestaw testów całego repozytorium nie jest jeszcze zaliczony.
 
 | Projekt | Zakres | Stan |
 |---|---|---|
-| [1](mini_project_1/README.md) | Dokumenty, tokeny, embeddingi i wyszukiwanie semantyczne | Do realizacji |
+| [1](mini_project_1/README.md) | Dokumenty, tokeny, embeddingi i wyszukiwanie semantyczne | Kod ukończony; 50/50 testów; rzeczywisty LLM do sprawdzenia |
 | [2](mini_project_2/README.md) | RAG i ewaluacja odpowiedzi | Do realizacji |
 | [3](mini_project_3/README.md) | Grafy, rozmowa i akceptacja decyzji | Do realizacji |
 | [4](mini_project_4/README.md) | Agent z narzędziami | Do realizacji |
 | [5](mini_project_5/README.md) | MCP i asystent | Do realizacji |
+
+## Miniprojekt 1 — implementacja i wyniki
+
+Zaimplementowano wczytywanie dokumentów z walidacją metadanych, liczenie tokenów i kosztów, podział na chunki, embeddingi z cache dokumentów i pytań, bazę wektorową z filtrowaniem oraz podobieństwo kosinusowe. Integracja LLM obsługuje OpenAI, OpenRouter i Ollamę oraz odczytuje zużycie tokenów z odpowiedzi dostawcy.
+
+Weryfikacja lokalna: **2026-11-21**, Python 3.12.8 i zależności z `uv.lock`.
+
+| Sprawdzenie | Wynik |
+|---|---|
+| Wszystkie testy `mini_project_1/tests` | **50/50 zaliczonych** |
+| Program `check.py`, w tym pipeline i raport | **14/14 zaliczonych** |
+| Dokumenty / tokeny dokumentów łącznie | 18 / 8762 |
+| Chunki / średnia długość / maksymalna długość | 47 / 603,7 znaku / 798 znaków |
+| Wektory chunków i pytań dostępne w cache | 47 + 10, po 1536 wymiarów |
+| Hit@1 / hit@3 dla 10 pytań kursowych | 0,9 / 0,9 |
+| Szacowany koszt miesięczny: wyszukany kontekst / cały korpus | 17,78 USD / 69,86 USD |
+
+Hit@k oznacza obecność właściwego dokumentu wśród pierwszych k wyników wyszukiwania. Nie mierzy poprawności odpowiedzi LLM-a. Q10, wskazujące dostawcę samym kodem `SUP-114`, nie znajduje właściwego dokumentu w top 3 — to ograniczenie wyszukiwania semantycznego widoczne także w przebiegu referencyjnym.
+
+Koszty są symulacją scenariusza z `config.yaml`: 400 pytań dziennie, 21 dni roboczych, 350 tokenów odpowiedzi i ustalone ceny kursowe z października 2026 r. Nie są poniesionym wydatkiem ani aktualnym cennikiem dostawcy.
+
+Testy LLM-a korzystają z atrap. Odczyt wszystkich 47 wektorów chunków i 10 wektorów pytań potwierdzono modelem zabraniającym nowych obliczeń. Nie wykonano prawdziwego wywołania LLM-a; brak potwierdzenia odpowiedzi dostawcy i rzeczywistego zużycia tokenów. Zaliczenie Edux pozostaje niepotwierdzone.
+
+Pipeline zapisuje lokalnie `mini_project_1/output/report.json` oraz `chunks.jsonl`. Wyniki można odtworzyć poleceniami poniżej; folder `output/` jest wykluczony z Gita.
 
 ## Uruchomienie na macOS / Linux
 
@@ -22,12 +46,12 @@ Wymagane: Git, Python 3 do instalacji narzędzi i dostęp do internetu podczas p
 
 ```bash
 sh scripts/setup.sh
-.venv/bin/python mini_project_1/src/check.py
+PYTHONPATH="$PWD" .venv/bin/python -m mini_project_1.src.check
 ```
 
 Skrypt instaluje zależności z `uv.lock`, tworzy `.venv` i pusty plik konfiguracyjny `.env` na podstawie przykładu, jeżeli plik jeszcze nie istnieje. Przy braku `uv` instaluje je lokalnie w `.tools/`. Ponowne uruchomienie zachowuje istniejący `.env`.
 
-Program `check.py` pokaże, które zadania czekają na wykonanie. Instrukcje do pierwszego zadania: [Miniprojekt 1](mini_project_1/README.md). Możesz aktywować środowisko poleceniem `source .venv/bin/activate`, a następnie używać `python` zamiast `.venv/bin/python`.
+Program `check.py` uruchamia testy sześciu kroków i weryfikuje raport pipeline'u. Instrukcje i szczegółowe wyniki: [Miniprojekt 1](mini_project_1/README.md). Możesz aktywować środowisko poleceniem `source .venv/bin/activate`, a następnie używać `python` zamiast `.venv/bin/python`.
 
 Klucz API wpisz wyłącznie do lokalnego `.env`, gdy dojdziesz do wywołań modelu. Testy jednostkowe działają bez klucza. `.env`, środowisko i lokalne narzędzia są wykluczone z Gita.
 
@@ -37,8 +61,11 @@ Klucz API wpisz wyłącznie do lokalnego `.env`, gdy dojdziesz do wywołań mode
 # Testy gotowej konfiguracji i pomocników; działają przed realizacją zadań:
 .venv/bin/python -m pytest -q mini_project_1/tests/test_provided_config.py mini_project_1/tests/test_provided_llm_notice.py mini_project_1/tests/test_provided_prompt.py
 
-# Testy pierwszego miniprojektu — po napisaniu jego kroków:
+# Wszystkie 50 testów ukończonego kodu Miniprojektu 1:
 .venv/bin/python -m pytest -q mini_project_1/tests
+
+# Pipeline i 14 sprawdzeń, bez prawdziwego wywołania LLM-a:
+PYTHONPATH="$PWD" .venv/bin/python -m mini_project_1.src.check
 
 # Wszystkie testy — wynik zależy od postępu w pięciu miniprojektach:
 .venv/bin/python -m pytest -q
@@ -51,7 +78,7 @@ git commit -m "Implement document loading for mini project 1"
 git push origin main
 ```
 
-GitHub Actions automatycznie sprawdza instalację środowiska, składnię Pythona oraz testy gotowej konfiguracji i pomocników. **Zielony wynik tego workflow nie oznacza ukończenia miniprojektów.** Pełne testy ćwiczeń można dodatkowo uruchomić ręcznie w zakładce Actions → Sprawdzenie środowiska → Run workflow → zaznaczając `Uruchom pełne testy ćwiczeń`.
+GitHub Actions automatycznie sprawdza instalację środowiska, składnię Pythona, wszystkie testy Miniprojektu 1 oraz jego pipeline i raport. Testy nie wywołują prawdziwego LLM-a. Zielony wynik nie potwierdza ukończenia miniprojektów 2–5 ani połączenia z dostawcą modelu. Pełne testy całego repozytorium można dodatkowo uruchomić ręcznie w zakładce Actions → Sprawdzenie środowiska → Run workflow → zaznaczając `Uruchom pełne testy ćwiczeń`.
 
 Do portfolio warto po każdym ukończonym miniprojekcie dopisać: własny zakres prac, sposób uruchomienia, wynik testów i przykład działania. Repozytorium źródłowe nie zawiera pliku licencji; ten projekt nie nadaje nowej licencji materiałom autora.
 
